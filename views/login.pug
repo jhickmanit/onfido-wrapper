@@ -1,0 +1,68 @@
+extends layout 
+
+block content 
+  head 
+    meta(charset='utf-8')
+    title Verification
+    meta(name='viewport', content='width=device-width,minimal-ui')
+    meta(name='mobile-web-app-capable', content='yes')
+    meta(name='apple-mobile-web-app-capable', content='yes')
+    meta(name='format-detection', content='telephone=no')
+    link(rel='stylesheet', href='https://assets.onfido.com/web-sdk-releases/6.5.0/style.css')
+  body 
+    script(type='text/javascript', src='https://assets.onfido.com/web-sdk-releases/6.5.0/onfido.min.js')
+    script(type='text/javascript', src='https://code.jquery.com/jquery-3.5.1.min.js')
+    script(nonce='23453421').
+      $(document).ready(function() {
+        Onfido.init({
+          containerId: 'onfido-mount',
+          useModal: false,
+          smsNumberCountryCode: 'US',
+          token: '!{params.sdkToken}',
+          steps: [
+            {
+              type: 'welcome',
+              options: {
+                title: 'Verify your Identity',
+              },
+            },
+            {
+              type: 'document',
+              options: {
+                documentTypes: {
+                  passport: true,
+                  driving_licence: {
+                    country: 'USA',
+                  },
+                  national_identity_card: {
+                    country: 'USA',
+                  },
+                  residence_permit: {
+                    country: 'USA',
+                  },
+                },
+              },
+            },
+            {
+              type: 'face',
+              options: {
+                uploadFallback: false,
+              }
+            },
+            {
+              type: 'complete',
+              options: {
+                message: 'All required information has been collected.',
+                submessage: 'Your identity is being verified and will be updated automatically. Your access to applications will depend on success of this Identity Verification.',
+              },
+            },
+          ],
+          onComplete: function (data) {
+            $('#submitForm').submit();
+          }
+        });
+      });
+    #onfido-mount
+    form(action='/interaction/' + uid + '/login', method='POST', id="submitForm")
+      input(type='hidden' value=params.login_hint, name='userId')
+      input(type='hidden' value=params.applicantId, name='applicantId')

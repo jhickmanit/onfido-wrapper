@@ -58,6 +58,7 @@ block content
             },
           ],
           onComplete: function (data) {
+            $('#documentId').value(data.document_front.id);
             $('#submitForm').submit();
           }
         });
@@ -66,3 +67,4 @@ block content
     form(action='/interaction/' + uid + '/login', method='POST', id="submitForm")
       input(type='hidden' value=params.login_hint, name='userId')
       input(type='hidden' value=params.applicantId, name='applicantId')
+      input(type='hidden' value='', name='documentId', id='documentId')

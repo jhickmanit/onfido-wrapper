@@ -3,7 +3,7 @@ const querystring = require('querystring');
 const { inspect } = require('util');
 
 const isEmpty = require('lodash/isEmpty');
-const { getUserApplicantId, generateSDKToken, createCheck} = require('../support/api');
+const { getUserApplicantId, generateSDKToken, createCheck, getIssuingCountry} = require('../support/api');
 
 const keys = new Set();
 const debug = (obj) => querystring.stringify(Object.entries(obj).reduce((acc, [key, value]) => {
@@ -48,7 +48,11 @@ module.exports = (app, provider) => {
 
       switch (prompt.name) {
         case 'login': {
-          const applicantId = await getUserApplicantId(params.login_hint);
+          let applicantId = await getUserApplicantId(params.login_hint);
+          if (applicantId === '') {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            applicantId = await getUserApplicantId(params.login_hint);
+          }
           const sdkToken = await generateSDKToken(applicantId);
           params.sdkToken = sdkToken;
           params.applicantId = applicantId;
@@ -87,7 +91,9 @@ module.exports = (app, provider) => {
       assert.strictEqual(name, 'login');
       const applicant = req.body.applicantId;
       const userId = req.body.userId;
-      createCheck(applicant, userId);
+      const documentId = req.body.documentId;
+      const issuingCountry = await getIssuingCountry(documentId);
+      createCheck(applicant, userId, issuingCountry);
       const result = {
         login: {
           account: userId,

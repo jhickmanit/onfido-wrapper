@@ -30,10 +30,17 @@ exports.generateSDKToken = (applicantId) => {
   });
 };
 
-exports.createCheck = (applicantId, userId) => {
+exports.getIssuingCountry = (documentId) => {
+  return onfidoClient.autofill.perform(documentId).then(document => {
+    return document.documentClassification.issuingCountry;
+  })
+}
+
+exports.createCheck = (applicantId, userId, issuingCountry) => {
   return got(`${workflowURL}/api/flo/${createCheckAlias}/invoke?clientToken=${createCheckToken}`, { method: 'POST', json: {
     applicantId: applicantId,
     userId: userId,
+    issuingCountry: issuingCountry,
   }}).then(response => {
     return response;
   });
